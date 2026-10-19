@@ -4,10 +4,10 @@ import DogCanvas from "./DogCanvas";
 import GroundShadow from "./GroundShadow";
 import { useFrames, useIdleLoop } from "@/hooks/use-frames";
 import { range, useMediaQuery, useReducedMotion, useScrollProgress } from "@/hooks/use-motion";
-import { cn, scrollToId } from "@/lib/utils";
+import { cn, media, scrollToId } from "@/lib/utils";
 
-const SIT = { base: "/media/seq/sit/", count: 97, w: 560, h: 538 };
-const WALK = { base: "/media/seq/walk/", count: 61, w: 720, h: 501 };
+const SIT = { base: media("seq/sit/"), count: 97, w: 560, h: 538 };
+const WALK = { base: media("seq/walk/"), count: 61, w: 720, h: 501 };
 const COATS = ["מתולתלת", "חלקה", "קצרה", "מלאה בקשרים"];
 
 /**

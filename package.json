@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "GITHUB_PAGES=true npm run build && touch dist/.nojekyll && cd dist && git init -q -b gh-pages && git add -A && git commit -qm deploy && git push -qf https://github.com/rinati392-cmd/parva.git gh-pages && rm -rf .git"
   },
   "dependencies": {
     "clsx": "^2.1.1",

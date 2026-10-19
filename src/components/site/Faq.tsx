@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { useRef } from "react";
 import Reveal from "./Reveal";
 import { useViewportProgress } from "@/hooks/use-motion";
-import { scrollToId } from "@/lib/utils";
+import { media, scrollToId } from "@/lib/utils";
 
 const FAQ = [
   {
@@ -40,7 +40,7 @@ const Faq = () => {
         <p className="lead mt-4 max-w-md">כל מה שכדאי לדעת לפני הביקור הראשון — כדי שתגיעו רגועים, ושהוא ירגיש את זה.</p>
         <div className="relative mt-10 h-40 md:h-56" aria-hidden>
           <img
-            src="/media/dog/side.webp"
+            src={media("dog/side.webp")}
             alt=""
             className="absolute bottom-3 h-full w-auto object-contain will-change-transform"
             style={{ right: 0, transform: `translateX(${-p * 70}%)` }}

@@ -3,7 +3,7 @@ import { ArrowRight, RotateCcw, Sparkles } from "lucide-react";
 import Reveal from "./Reveal";
 import GroundShadow from "./GroundShadow";
 import { treatmentById, type TreatmentId } from "./treatment-data";
-import { cn } from "@/lib/utils";
+import { cn, media } from "@/lib/utils";
 
 type Answers = Record<string, string>;
 
@@ -90,8 +90,8 @@ const TreatmentFinder = ({ onChoose }: Props) => {
           <div aria-hidden className="absolute inset-[8%] rounded-full bg-accent/25 blur-3xl" />
           <div className="relative h-[360px] md:h-[460px]">
             {[
-              { src: "/media/dog/sit.webp", alt: "פודל משמשי יושב ומחכה לתשובות שלכם", show: !done },
-              { src: "/media/dog/bowtie.webp", alt: "פודל משמשי עם פפיון, מוכן לטיפול", show: done },
+              { src: media("dog/sit.webp"), alt: "פודל משמשי יושב ומחכה לתשובות שלכם", show: !done },
+              { src: media("dog/bowtie.webp"), alt: "פודל משמשי עם פפיון, מוכן לטיפול", show: done },
             ].map((d) => (
               <img
                 key={d.src}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { cn, scrollToId } from "@/lib/utils";
+import { cn, media, scrollToId } from "@/lib/utils";
 
 const NAV = [
   { id: "finder", label: "איזה טיפול?" },
@@ -26,7 +26,7 @@ const Header = () => {
     >
       <div className="container flex h-16 items-center justify-between gap-4 md:h-20">
         <a href="#top" aria-label="פרווה טובה — לראש העמוד" className="shrink-0">
-          <img src="/media/logo.svg" alt="פרווה טובה" className="h-9 w-auto md:h-11" width={172} height={56} />
+          <img src={media("logo.svg")} alt="פרווה טובה" className="h-9 w-auto md:h-11" width={172} height={56} />
         </a>
         <nav aria-label="ניווט ראשי" className="hidden lg:block">
           <ul className="flex items-center gap-8 text-[15px] font-medium text-foreground/80">

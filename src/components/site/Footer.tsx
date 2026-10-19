@@ -1,7 +1,9 @@
+import { media } from "@/lib/utils";
+
 const Footer = () => (
   <footer className="relative bg-primary pb-28 pt-14 text-primary-foreground md:pb-14">
     <img
-      src="/media/dog/walk.webp"
+      src={media("dog/walk.webp")}
       alt=""
       aria-hidden
       className="pointer-events-none absolute -top-[88px] left-[8%] h-24 w-auto object-contain md:-top-[118px] md:h-32"
@@ -9,7 +11,7 @@ const Footer = () => (
     />
     <div className="container flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
       <div className="flex items-center gap-4">
-        <img src="/media/logo.svg" alt="" className="h-12 w-auto brightness-0 invert" width={172} height={56} />
+        <img src={media("logo.svg")} alt="" className="h-12 w-auto brightness-0 invert" width={172} height={56} />
         <div>
           <p className="text-xl font-bold">פרווה טובה</p>
           <p className="text-primary-foreground/70">מספרת כלבים בירושלים</p>
