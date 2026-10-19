@@ -1,0 +1,14 @@
+node_modules
+dist
+.DS_Store
+*.local
+
+# Raw source assets (optimized copies live in public/media)
+magnific-clips/
+/*.mp4
+/*.png
+/*.jpg
+/*.jpeg
+/*.ai
+/*.xd
+/logo.svg

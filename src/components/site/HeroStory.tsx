@@ -1,0 +1,139 @@
+import { useRef } from "react";
+import { ArrowDown } from "lucide-react";
+import DogCanvas from "./DogCanvas";
+import GroundShadow from "./GroundShadow";
+import { useFrames, useIdleLoop } from "@/hooks/use-frames";
+import { range, useMediaQuery, useReducedMotion, useScrollProgress } from "@/hooks/use-motion";
+import { cn, scrollToId } from "@/lib/utils";
+
+const SIT = { base: "/media/seq/sit/", count: 97, w: 560, h: 538 };
+const WALK = { base: "/media/seq/walk/", count: 61, w: 720, h: 501 };
+const COATS = ["מתולתלת", "חלקה", "קצרה", "מלאה בקשרים"];
+
+/**
+ * 01 + 02 — one pinned stage.
+ * The dog sits and blinks → stands up as you scroll → walks across the page.
+ */
+const HeroStory = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const p = useScrollProgress(sectionRef);
+  const reduced = useReducedMotion();
+  const sit = useFrames(SIT.base, SIT.count);
+  const walk = useFrames(WALK.base, WALK.count);
+
+  const idle = useIdleLoop(0, 18, 10, !reduced && p < 0.05);
+
+  // Timeline
+  const heroOut = range(p, 0.05, 0.2);
+  const standUp = range(p, 0.06, 0.44);
+  const sitOut = range(p, 0.36, 0.44);
+  const storyIn = range(p, 0.46, 0.56);
+  const walkTravel = range(p, 0.44, 1);
+  const walkOn = p > 0.43 ? 1 : 0;
+
+  const sitIndex = p < 0.05 ? idle : 18 + standUp * (SIT.count - 19);
+  const walkIndex = Math.floor(Math.max(0, p - 0.43) * WALK.count * 6) % WALK.count;
+  const coatsShown = Math.floor(range(p, 0.55, 0.85) * COATS.length + 0.001);
+
+  // RTL "forward" is leftward: the sitting dog stands and walks out to the left,
+  // then the walking dog enters from the right and crosses under the story copy.
+  // The sitting dog is small inside the sequence frame (it grows as it walks closer), so zoom it in at rest.
+  const isLg = useMediaQuery("(min-width: 1024px)");
+  const zoom0 = isLg ? 1.4 : 1.3;
+  const zoom = zoom0 - standUp * (zoom0 - 1);
+  const sitX = (isLg ? -20 : 0) - sitOut * 40;
+  const walkX = reduced ? 0 : 60 - walkTravel * 70;
+
+  return (
+    <section ref={sectionRef} id="top" className="relative h-[420vh]" aria-label="פתיחה">
+      <div className="sticky top-0 h-[100dvh] overflow-hidden">
+        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(60%_55%_at_28%_72%,hsl(var(--accent)/.28),transparent_70%)]" />
+
+        {/* Hero copy */}
+        <div
+          className="container relative z-10 flex h-full flex-col justify-start pt-24 md:pt-32 lg:justify-center lg:pt-0"
+          style={{ opacity: 1 - heroOut, transform: `translateY(${-heroOut * 40}px)`, pointerEvents: heroOut > 0.6 ? "none" : "auto" }}
+        >
+          <div className="max-w-xl lg:max-w-[46%]">
+            <p className="eyebrow animate-fade-up">מספרת כלבים בירושלים</p>
+            <h1 className="mt-4 animate-fade-up text-[clamp(2.6rem,10.5vw,4.5rem)] font-extrabold text-primary [animation-delay:100ms] lg:text-[clamp(3.5rem,5.4vw,5.6rem)]">
+              הם באים להתפנק.
+              <br />
+              <span className="text-accent">אתם</span> באים להתאהב.
+            </h1>
+            <p className="mt-5 max-w-lg animate-fade-up text-lg text-muted-foreground [animation-delay:200ms] md:text-xl">
+              תספורת, רחצה וטיפוח עם תשומת לב לכל פרט — ובעיקר למי שנמצא מתחת לפרווה.
+            </p>
+            <div className="mt-7 flex animate-fade-up flex-col gap-3 [animation-delay:300ms] sm:flex-row sm:items-center">
+              <button onClick={() => scrollToId("booking")} className="btn-primary">קובעים תור</button>
+              <button onClick={() => scrollToId("finder")} className="btn-ghost">איזה טיפול מתאים לכלב שלי?</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Story copy */}
+        <div
+          className="container absolute inset-x-0 top-0 z-10 pt-24 text-center md:pt-28"
+          style={{ opacity: storyIn, transform: `translateY(${(1 - storyIn) * 30}px)`, pointerEvents: storyIn > 0.5 ? "auto" : "none" }}
+          aria-hidden={storyIn < 0.5}
+        >
+          <h2 className="section-title">לכל פרווה יש סיפור.</h2>
+          <p className="lead mx-auto mt-4 max-w-2xl">מתולתלת, חלקה, קצרה או מלאה בקשרים — לכל כלב מתאים טיפול קצת אחר.</p>
+          <ul className="mt-6 flex flex-wrap justify-center gap-2" aria-label="סוגי פרווה">
+            {COATS.map((c, i) => (
+              <li
+                key={c}
+                className={cn(
+                  "rounded-full border border-primary/15 bg-card/80 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur transition-all duration-500",
+                  i < coatsShown ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0",
+                )}
+              >
+                פרווה {c}
+              </li>
+            ))}
+          </ul>
+          <button
+            onClick={() => scrollToId("finder")}
+            className={cn("btn-ghost mt-7 bg-background/70 backdrop-blur transition-opacity duration-500", p > 0.8 ? "opacity-100" : "opacity-0")}
+            tabIndex={p > 0.8 ? 0 : -1}
+          >
+            בואו נמצא את הטיפול המתאים
+          </button>
+        </div>
+
+        {/* The dog — sitting → standing → walking out */}
+        <div
+          className="absolute bottom-[4vh] left-1/2 w-[min(66vw,340px)] will-change-transform lg:bottom-[7vh] lg:w-[min(34vw,500px)]"
+          style={{ transform: `translate3d(calc(-50% + ${sitX}vw),0,0)`, opacity: 1 - sitOut }}
+          aria-hidden={sitOut > 0.5}
+        >
+          <div style={{ transform: `scale(${zoom})`, transformOrigin: "50% 92%" }}>
+            <DogCanvas {...sit} index={sitIndex} width={SIT.w} height={SIT.h} label="פודל משמשי יושב, מביט אליכם וממצמץ" />
+          </div>
+          <GroundShadow className="-mt-5 w-1/2" />
+        </div>
+
+        {/* The dog — walking across the page */}
+        <div
+          className="absolute bottom-[4vh] left-1/2 w-[min(76vw,380px)] will-change-transform lg:bottom-[7vh] lg:w-[min(34vw,480px)]"
+          style={{ transform: `translate3d(calc(-50% + ${walkX}vw),0,0)`, opacity: walkOn }}
+          aria-hidden={!walkOn}
+        >
+          <DogCanvas {...walk} index={walkIndex} width={WALK.w} height={WALK.h} label="פודל משמשי צועד הלאה" />
+          <GroundShadow className="-mt-4 w-2/3" />
+        </div>
+
+        <div
+          className="absolute bottom-4 right-1/2 hidden translate-x-1/2 flex-col items-center gap-1 text-xs text-muted-foreground transition-opacity md:flex"
+          style={{ opacity: 1 - heroOut }}
+          aria-hidden
+        >
+          גוללים, והוא קם ללכת
+          <ArrowDown className="h-4 w-4 animate-bounce" />
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default HeroStory;

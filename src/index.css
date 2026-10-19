@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Brand tokens — HSL, per Lovable conventions */
+@layer base {
+  :root {
+    --background: 47 36% 95%;      /* #F7F5EE */
+    --foreground: 105 5% 16%;      /* #282B27 */
+    --primary: 155 24% 20%;        /* #263E34 forest */
+    --primary-foreground: 0 0% 100%;
+    --accent: 25 55% 67%;          /* #D9A27C peach */
+    --accent-foreground: 105 5% 16%;
+    --muted: 47 22% 90%;
+    --muted-foreground: 105 4% 34%;
+    --card: 0 0% 100%;
+    --card-foreground: 105 5% 16%;
+    --studio: 210 39% 93%;         /* photo backdrop */
+    --border: 47 14% 84%;
+    --input: 47 14% 80%;
+    --ring: 155 24% 20%;
+    --radius: 1.25rem;
+  }
+
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: "Google Sans", "Heebo", system-ui, sans-serif;
+    line-height: 1.7;
+    overflow-x: clip;
+  }
+  h1, h2, h3 { letter-spacing: -0.02em; line-height: 1.08; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  :focus-visible { outline: 3px solid hsl(var(--accent)); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex h-14 items-center justify-center gap-2 rounded-full bg-primary px-8 text-lg font-semibold text-primary-foreground shadow-[0_10px_30px_-12px_hsl(var(--primary)/.6)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90 active:translate-y-0;
+  }
+  .btn-ghost {
+    @apply inline-flex h-14 items-center justify-center gap-2 rounded-full border-2 border-primary/15 px-7 text-lg font-semibold text-primary transition-all duration-300 hover:border-primary/40 hover:bg-primary/5;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-sm font-semibold tracking-wide text-primary/80;
+  }
+  .eyebrow::before { content: ""; @apply h-px w-8 bg-accent; }
+  .section-title { @apply text-[clamp(2.25rem,6vw,4.25rem)] font-extrabold text-primary; }
+  .lead { @apply text-lg text-muted-foreground md:text-xl; }
+
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1); }
+  .reveal.is-in { opacity: 1; transform: none; }
+}
