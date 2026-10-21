@@ -113,7 +113,7 @@ const HeroStory = () => {
         {/* The dog — sitting → standing → walking out */}
         <div
           className="absolute bottom-[4vh] left-1/2 w-[min(66vw,340px)] will-change-transform lg:bottom-[7vh] lg:w-[min(34vw,500px)]"
-          style={{ transform: `translate3d(calc(-50% + ${sitX}vw),0,0)`, opacity: 1 - sitOut, width: fit?.sit }}
+          style={{ transform: `translate3d(calc(-50% + ${sitX}vw),0,0)`, opacity: 1 - sitOut, width: fit?.sit, bottom: fit?.sitBottom }}
           aria-hidden={sitOut > 0.5}
         >
           <div style={{ transform: `scale(${zoom})`, transformOrigin: "50% 92%" }}>
@@ -125,7 +125,7 @@ const HeroStory = () => {
         {/* The dog — walking across the page */}
         <div
           className="absolute bottom-[calc(4vh+76px)] left-1/2 md:bottom-[4vh] w-[min(76vw,380px)] will-change-transform lg:bottom-[7vh] lg:w-[min(34vw,480px)]"
-          style={{ transform: `translate3d(calc(-50% + ${walkX}vw),0,0)`, opacity: walkOn, width: fit?.walk }}
+          style={{ transform: `translate3d(calc(-50% + ${walkX}vw),0,0)`, opacity: walkOn, width: fit?.walk, bottom: fit?.walkBottom }}
           aria-hidden={!walkOn}
         >
           <DogCanvas {...walk} index={walkIndex} width={WALK.w} height={WALK.h} label="פודל משמשי צועד הלאה" />
@@ -154,7 +154,7 @@ function useMobileDogFit(
   story: React.RefObject<HTMLDivElement>,
   enabled: boolean,
 ) {
-  const [fit, setFit] = useState<{ sit: number; walk: number } | null>(null);
+  const [fit, setFit] = useState<{ sit: number; walk: number; sitBottom: number; walkBottom: number } | null>(null);
   useEffect(() => {
     if (!enabled) { setFit(null); return; }
     const measure = () => {
@@ -163,12 +163,21 @@ function useMobileDogFit(
       const vw = window.innerWidth, vh = window.innerHeight, gap = 28;
       // offsetTop/Height ignore the scroll-driven transforms, so this is the resting layout.
       const heroBottomPx = (h.offsetParent ? (h.offsetParent as HTMLElement).offsetTop : 0) + h.offsetTop + h.offsetHeight;
-      const sitRoom = vh - heroBottomPx - gap - vh * 0.04;
-      const walkRoom = vh - (st.offsetTop + st.offsetHeight) - gap - (vh * 0.04 + 76);
-      // Visible dog height ≈ 0.84 × canvas width (sitting, zoomed) and 0.7 × width (walking).
+      const baseBottom = vh * 0.04;
+      // Visible dog height as a share of canvas width, measured from the frames:
+      // sitting (incl. the rest zoom) ≈ 0.95 × width, walking ≈ 0.7 × width.
+      const SIT_H = 0.95, WALK_H = 0.7;
+      const sitTop = heroBottomPx + gap;
+      const walkTop = st.offsetTop + st.offsetHeight + gap;
+      const sit = Math.max(170, Math.min(vw * 0.66, 340, (vh - sitTop - baseBottom) / SIT_H));
+      const walk = Math.max(170, Math.min(vw * 0.76, 380, (vh - walkTop - baseBottom - 76) / WALK_H));
+      // Anchor the head just under the copy; when space runs out the paws run off the
+      // bottom edge instead of the dog climbing over the buttons.
       setFit({
-        sit: Math.max(120, Math.min(vw * 0.66, 340, sitRoom / 0.84)),
-        walk: Math.max(140, Math.min(vw * 0.76, 380, walkRoom / 0.7)),
+        sit,
+        walk,
+        sitBottom: Math.min(baseBottom, vh - sitTop - sit * SIT_H),
+        walkBottom: Math.min(baseBottom + 76, vh - walkTop - walk * WALK_H),
       });
     };
     measure();
