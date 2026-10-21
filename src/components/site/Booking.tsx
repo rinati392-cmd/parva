@@ -38,7 +38,7 @@ const Booking = ({ treatment, onTreatmentChange }: Props) => {
       <div className="container grid items-start gap-12 lg:grid-cols-[1fr_1.2fr] lg:gap-20">
         <Reveal className="lg:sticky lg:top-28">
           <p className="eyebrow">קובעים תור</p>
-          <h2 id="booking-title" className="section-title mt-4">השולחן מוכן. רק חסר הוא.</h2>
+          <h2 id="booking-title" className="section-title mt-4">השולחן מוכן. רק הוא חסר.</h2>
           <p className="lead mt-4 max-w-md">השאירו פרטים ונחזור אליכם לתאם מועד שנוח לכם — וגם לו.</p>
           <div className="relative mt-8 max-w-sm">
             <div aria-hidden className="absolute inset-[12%] rounded-full bg-background/70 blur-3xl" />
