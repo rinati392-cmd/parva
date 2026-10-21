@@ -2,12 +2,14 @@ import { useRef } from "react";
 import { ArrowDown } from "lucide-react";
 import DogCanvas from "./DogCanvas";
 import GroundShadow from "./GroundShadow";
-import { useFrames, useIdleLoop } from "@/hooks/use-frames";
+import { useClock, useFrames, useIdleLoop } from "@/hooks/use-frames";
 import { range, useMediaQuery, useReducedMotion, useScrollProgress } from "@/hooks/use-motion";
 import { cn, media, scrollToId } from "@/lib/utils";
 
 const SIT = { base: media("seq/sit/"), count: 97, w: 560, h: 538 };
-const WALK = { base: media("seq/walk/"), count: 61, w: 720, h: 501 };
+const WALK = { base: media("seq/walk/"), count: 121, w: 640, h: 445, fps: 24 };
+/** Seconds the walking dog takes to cross the whole screen, entering right and leaving left. */
+const CROSS_SECONDS = 9;
 const COATS = ["מתולתלת", "חלקה", "קצרה", "מלאה בקשרים"];
 
 /**
@@ -28,21 +30,22 @@ const HeroStory = () => {
   const standUp = range(p, 0.06, 0.44);
   const sitOut = range(p, 0.36, 0.44);
   const storyIn = range(p, 0.46, 0.56);
-  const walkTravel = range(p, 0.44, 1);
   const walkOn = p > 0.43 ? 1 : 0;
 
   const sitIndex = p < 0.05 ? idle : 18 + standUp * (SIT.count - 19);
-  const walkIndex = Math.floor(Math.max(0, p - 0.43) * WALK.count * 6) % WALK.count;
+  // The walk plays like a video — on its own clock, not tied to the scroll position.
+  const t = useClock(walkOn === 1 && p < 0.999, WALK.fps);
+  const walkIndex = Math.floor(t * WALK.fps) % WALK.count;
   const coatsShown = Math.floor(range(p, 0.55, 0.85) * COATS.length + 0.001);
 
   // RTL "forward" is leftward: the sitting dog stands and walks out to the left,
-  // then the walking dog enters from the right and crosses under the story copy.
+  // then the walking dog keeps crossing under the story copy, right to left, on a loop.
   // The sitting dog is small inside the sequence frame (it grows as it walks closer), so zoom it in at rest.
   const isLg = useMediaQuery("(min-width: 1024px)");
   const zoom0 = isLg ? 1.4 : 1.3;
   const zoom = zoom0 - standUp * (zoom0 - 1);
   const sitX = (isLg ? -20 : 0) - sitOut * 40;
-  const walkX = reduced ? 0 : 60 - walkTravel * 70;
+  const walkX = reduced ? 0 : 65 - ((t % CROSS_SECONDS) / CROSS_SECONDS) * 130;
 
   return (
     <section ref={sectionRef} id="top" className="relative h-[420vh]" aria-label="פתיחה">

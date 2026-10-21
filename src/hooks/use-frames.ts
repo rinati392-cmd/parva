@@ -41,3 +41,23 @@ export function useIdleLoop(from: number, to: number, fps: number, active: boole
   }, [from, to, fps, active]);
   return i;
 }
+
+/** Seconds elapsed while `active`, ticking at `fps` (resets when it stops). */
+export function useClock(active: boolean, fps: number) {
+  const [t, setT] = useState(0);
+  useEffect(() => {
+    if (!active) { setT(0); return; }
+    let raf = 0;
+    let last = -1;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const elapsed = (now - start) / 1000;
+      const frame = Math.floor(elapsed * fps);
+      if (frame !== last) { last = frame; setT(elapsed); }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [active, fps]);
+  return t;
+}
