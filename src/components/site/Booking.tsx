@@ -39,7 +39,7 @@ const Booking = ({ treatment, onTreatmentChange }: Props) => {
         <Reveal className="lg:sticky lg:top-28">
           <p className="eyebrow">קובעים תור</p>
           <h2 id="booking-title" className="section-title mt-4">השולחן מוכן. רק חסר הוא.</h2>
-          <p className="lead mt-4 max-w-md">השאירו פרטים, ונחזור אליכם לתאם מועד שנוח לכם — וגם לו.</p>
+          <p className="lead mt-4 max-w-md">השאירו פרטים ונחזור אליכם לתאם מועד שנוח לכם — וגם לו.</p>
           <div className="relative mt-8 max-w-sm">
             <div aria-hidden className="absolute inset-[12%] rounded-full bg-background/70 blur-3xl" />
             <DogClip clip={CLIPS.wave} label="פודל משמשי מנופף לכם לשלום" className="relative mx-auto flex h-[300px] justify-center md:h-[380px]" canvasClassName="h-full w-auto" />
