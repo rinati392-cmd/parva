@@ -26,7 +26,10 @@ const Footer = () => (
         </ul>
       </nav>
     </div>
-    <p className="container mt-10 text-sm text-primary-foreground/50">© {new Date().getFullYear()} פרווה טובה</p>
+    <div className="container mt-10 flex flex-col gap-1 text-sm text-primary-foreground/50 sm:flex-row sm:justify-between">
+      <p>© {new Date().getFullYear()} פרווה טובה</p>
+      <p>עיצוב ופיתוח: רינת שטרית</p>
+    </div>
   </footer>
 );
 
