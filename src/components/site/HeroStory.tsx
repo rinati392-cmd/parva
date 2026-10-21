@@ -8,8 +8,10 @@ import { cn, media, scrollToId } from "@/lib/utils";
 
 const SIT = { base: media("seq/sit/"), count: 97, w: 560, h: 538 };
 const WALK = { base: media("seq/walk/"), count: 121, w: 640, h: 445, fps: 24 };
+/** Plays the walk a little faster than real time so it feels lively next to the copy. */
+const WALK_SPEED = 1.35;
 /** Seconds the walking dog takes to cross the whole screen, entering right and leaving left. */
-const CROSS_SECONDS = 9;
+const CROSS_SECONDS = 6;
 const COATS = ["מתולתלת", "חלקה", "קצרה", "מלאה בקשרים"];
 
 /**
@@ -34,7 +36,7 @@ const HeroStory = () => {
 
   const sitIndex = p < 0.05 ? idle : 18 + standUp * (SIT.count - 19);
   // The walk plays like a video — on its own clock, not tied to the scroll position.
-  const t = useClock(walkOn === 1 && p < 0.999, WALK.fps);
+  const t = useClock(walkOn === 1 && p < 0.999, WALK.fps * WALK_SPEED) * WALK_SPEED;
   const walkIndex = Math.floor(t * WALK.fps) % WALK.count;
   const coatsShown = Math.floor(range(p, 0.55, 0.85) * COATS.length + 0.001);
 
@@ -118,7 +120,7 @@ const HeroStory = () => {
 
         {/* The dog — walking across the page */}
         <div
-          className="absolute bottom-[4vh] left-1/2 w-[min(76vw,380px)] will-change-transform lg:bottom-[7vh] lg:w-[min(34vw,480px)]"
+          className="absolute bottom-[calc(4vh+76px)] left-1/2 md:bottom-[4vh] w-[min(76vw,380px)] will-change-transform lg:bottom-[7vh] lg:w-[min(34vw,480px)]"
           style={{ transform: `translate3d(calc(-50% + ${walkX}vw),0,0)`, opacity: walkOn }}
           aria-hidden={!walkOn}
         >
