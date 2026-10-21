@@ -50,7 +50,12 @@ const HeroStory = () => {
   const zoom0 = isLg ? 1.4 : 1.3;
   const zoom = zoom0 - standUp * (zoom0 - 1);
   const sitX = (isLg ? -20 : 0) - sitOut * 40;
-  const walkX = reduced ? 0 : 65 - ((t % CROSS_SECONDS) / CROSS_SECONDS) * 130;
+  // Desktop: the dog keeps crossing on a loop. Phones: one crossing, then it's gone —
+  // it walks off the left edge and never lingers over the copy or the bottom bar.
+  const crossings = t / CROSS_SECONDS;
+  const walkX = reduced ? 0 : 65 - (isLg ? crossings % 1 : Math.min(crossings, 1)) * 130;
+  const walkedOff = !isLg && crossings >= 1;
+  const walkOpacity = walkOn * (walkedOff ? 0 : 1) * (1 - range(p, 0.93, 0.99));
 
   return (
     <section ref={sectionRef} id="top" className="relative h-[420vh]" aria-label="פתיחה">
@@ -125,8 +130,8 @@ const HeroStory = () => {
         {/* The dog — walking across the page */}
         <div
           className="absolute bottom-[calc(4vh+76px)] left-1/2 md:bottom-[4vh] w-[min(76vw,380px)] will-change-transform lg:bottom-[7vh] lg:w-[min(34vw,480px)]"
-          style={{ transform: `translate3d(calc(-50% + ${walkX}vw),0,0)`, opacity: walkOn, width: fit?.walk, bottom: fit?.walkBottom }}
-          aria-hidden={!walkOn}
+          style={{ transform: `translate3d(calc(-50% + ${walkX}vw),0,0)`, opacity: walkOpacity, width: fit?.walk, bottom: fit?.walkBottom }}
+          aria-hidden={walkOpacity === 0}
         >
           <DogCanvas {...walk} index={walkIndex} width={WALK.w} height={WALK.h} label="פודל משמשי צועד הלאה" />
           <GroundShadow className="-mt-4 w-2/3" />
