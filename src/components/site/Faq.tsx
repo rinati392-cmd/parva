@@ -65,7 +65,7 @@ const Faq = () => {
         <p className="mt-6 text-base text-muted-foreground">
           לא מצאתם תשובה?{" "}
           <button onClick={() => scrollToId("booking")} className="font-semibold text-primary underline underline-offset-4">
-            כתבו לנו בטופס, ונחזור אליכם
+            כתבו לנו בטופס ונחזור אליכם
           </button>
         </p>
       </Reveal>
