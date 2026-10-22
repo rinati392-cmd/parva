@@ -61,3 +61,24 @@ export function useClock(active: boolean, fps: number) {
   }, [active, fps]);
   return t;
 }
+
+/**
+ * Plays once: seconds elapsed since `trigger` became true, clamped to `duration`.
+ * Stops ticking at the end; resets to 0 when `trigger` turns false (so it can replay).
+ */
+export function usePlayOnce(trigger: boolean, duration: number) {
+  const [t, setT] = useState(0);
+  useEffect(() => {
+    if (!trigger) { setT(0); return; }
+    let raf = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const elapsed = Math.min(duration, (now - start) / 1000);
+      setT(elapsed);
+      if (elapsed < duration) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [trigger, duration]);
+  return t;
+}

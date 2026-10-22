@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowDown } from "lucide-react";
 import DogCanvas from "./DogCanvas";
 import GroundShadow from "./GroundShadow";
-import { useClock, useFrames, useIdleLoop } from "@/hooks/use-frames";
+import { useFrames, useIdleLoop, usePlayOnce } from "@/hooks/use-frames";
 import { range, useMediaQuery, useReducedMotion, useScrollProgress } from "@/hooks/use-motion";
 import { cn, media, scrollToId } from "@/lib/utils";
 
@@ -10,8 +10,8 @@ const SIT = { base: media("seq/sit/"), count: 97, w: 560, h: 538 };
 const WALK = { base: media("seq/walk/"), count: 121, w: 640, h: 445, fps: 24 };
 /** Plays the walk a little faster than real time so it feels lively next to the copy. */
 const WALK_SPEED = 1.35;
-/** Seconds the walking dog takes to cross the whole screen, entering right and leaving left. */
-const CROSS_SECONDS = 6;
+/** One play-through of the walk, in seconds — the dog crosses the screen exactly once. */
+const WALK_SECONDS = WALK.count / (WALK.fps * WALK_SPEED);
 const COATS = ["מתולתלת", "חלקה", "קצרה", "מלאה בקשרים"];
 
 /**
@@ -27,21 +27,32 @@ const HeroStory = () => {
 
   const idle = useIdleLoop(0, 18, 10, !reduced && p < 0.05);
 
-  // Timeline
-  const heroOut = range(p, 0.05, 0.2);
-  const standUp = range(p, 0.06, 0.44);
-  const sitOut = range(p, 0.36, 0.44);
-  const storyIn = range(p, 0.46, 0.56);
-  const walkOn = p > 0.43 ? 1 : 0;
+  // Timeline — the scroll drives the hero and the stand-up; the walk is a one-shot video.
+  const heroOut = range(p, 0.04, 0.18);
+  const standUp = range(p, 0.05, 0.48);
+  const sitOut = range(p, 0.42, 0.5);
+  const sitIndex = p < 0.04 ? idle : 18 + standUp * (SIT.count - 19);
 
-  const sitIndex = p < 0.05 ? idle : 18 + standUp * (SIT.count - 19);
-  // The walk plays like a video — on its own clock, not tied to the scroll position.
-  const t = useClock(walkOn === 1 && p < 0.999, WALK.fps * WALK_SPEED) * WALK_SPEED;
-  const walkIndex = Math.floor(t * WALK.fps) % WALK.count;
-  const coatsShown = Math.floor(range(p, 0.55, 0.85) * COATS.length + 0.001);
+  // Crossing into the story starts the walk once; scrolling back above the hero resets it.
+  const [storyStarted, setStoryStarted] = useState(false);
+  useEffect(() => {
+    if (p > 0.5) setStoryStarted(true);
+    else if (p < 0.3) setStoryStarted(false);
+  }, [p]);
+  const t = usePlayOnce(storyStarted && !reduced, WALK_SECONDS);
+  const f = reduced ? (storyStarted ? 1 : 0) : t / WALK_SECONDS; // 0 → 1 over the single play-through
+  const walkIndex = Math.min(WALK.count - 1, Math.floor(t * WALK.fps * WALK_SPEED));
 
-  // RTL "forward" is leftward: the sitting dog stands and walks out to the left,
-  // then the walking dog keeps crossing under the story copy, right to left, on a loop.
+  // The story copy is revealed in step with the video.
+  const show = {
+    title: storyStarted,
+    lead: f >= 0.12,
+    coat: (i: number) => f >= 0.3 + i * 0.12,
+    cta: f >= 0.85,
+  };
+
+  // RTL "forward" is leftward: the sitting dog stands and walks out to the left, then the
+  // walking dog enters from the right, crosses under the story copy once, and is gone.
   // The sitting dog is small inside the sequence frame (it grows as it walks closer), so zoom it in at rest.
   const isLg = useMediaQuery("(min-width: 1024px)");
   const heroTextRef = useRef<HTMLDivElement>(null);
@@ -50,15 +61,11 @@ const HeroStory = () => {
   const zoom0 = isLg ? 1.4 : 1.3;
   const zoom = zoom0 - standUp * (zoom0 - 1);
   const sitX = (isLg ? -20 : 0) - sitOut * 40;
-  // Desktop: the dog keeps crossing on a loop. Phones: one crossing, then it's gone —
-  // it walks off the left edge and never lingers over the copy or the bottom bar.
-  const crossings = t / CROSS_SECONDS;
-  const walkX = reduced ? 0 : 65 - (isLg ? crossings % 1 : Math.min(crossings, 1)) * 130;
-  const walkedOff = !isLg && crossings >= 1;
-  const walkOpacity = walkOn * (walkedOff ? 0 : 1) * (1 - range(p, 0.93, 0.99));
+  const walkX = reduced ? 0 : 65 - f * 130;
+  const walkOpacity = storyStarted && !reduced && f > 0 && f < 1 ? 1 : 0;
 
   return (
-    <section ref={sectionRef} id="top" className="relative h-[420vh]" aria-label="פתיחה">
+    <section ref={sectionRef} id="top" className="relative h-[300vh]" aria-label="פתיחה">
       <div className="sticky top-0 h-[100dvh] overflow-hidden">
         <div aria-hidden className="absolute inset-0 bg-[radial-gradient(60%_55%_at_28%_72%,hsl(var(--accent)/.28),transparent_70%)]" />
 
@@ -84,22 +91,24 @@ const HeroStory = () => {
           </div>
         </div>
 
-        {/* Story copy */}
+        {/* Story copy — revealed in step with the one-shot walk */}
         <div
           ref={storyRef}
           className="container absolute inset-x-0 top-0 z-10 pt-24 text-center md:pt-28"
-          style={{ opacity: storyIn, transform: `translateY(${(1 - storyIn) * 30}px)`, pointerEvents: storyIn > 0.5 ? "auto" : "none" }}
-          aria-hidden={storyIn < 0.5}
+          style={{ pointerEvents: show.title ? "auto" : "none" }}
+          aria-hidden={!show.title}
         >
-          <h2 className="section-title">לכל פרווה יש סיפור.</h2>
-          <p className="lead mx-auto mt-4 max-w-2xl">מתולתלת, חלקה, קצרה או מלאה בקשרים — לכל כלב מתאים טיפול קצת אחר.</p>
+          <h2 className={cn("section-title", step(show.title))}>לכל פרווה יש סיפור.</h2>
+          <p className={cn("lead mx-auto mt-4 max-w-2xl", step(show.lead))}>
+            מתולתלת, חלקה, קצרה או מלאה בקשרים — לכל כלב מתאים טיפול קצת אחר.
+          </p>
           <ul className="mt-6 flex flex-wrap justify-center gap-2" aria-label="סוגי פרווה">
             {COATS.map((c, i) => (
               <li
                 key={c}
                 className={cn(
-                  "rounded-full border border-primary/15 bg-card/80 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur transition-all duration-500",
-                  i < coatsShown ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0",
+                  "rounded-full border border-primary/15 bg-card/80 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur",
+                  step(show.coat(i)),
                 )}
               >
                 פרווה {c}
@@ -108,8 +117,8 @@ const HeroStory = () => {
           </ul>
           <button
             onClick={() => scrollToId("finder")}
-            className={cn("btn-ghost mt-7 bg-background/70 backdrop-blur transition-opacity duration-500", p > 0.8 ? "opacity-100" : "opacity-0")}
-            tabIndex={p > 0.8 ? 0 : -1}
+            className={cn("btn-ghost mt-7 bg-background/70 backdrop-blur", step(show.cta))}
+            tabIndex={show.cta ? 0 : -1}
           >
             בואו נמצא את הטיפול המתאים
           </button>
@@ -149,6 +158,10 @@ const HeroStory = () => {
     </section>
   );
 };
+
+/** Fade-and-rise reveal used for each story element. */
+const step = (visible: boolean) =>
+  cn("transition-all duration-700 ease-out", visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0");
 
 /**
  * On phones the copy and buttons take most of the screen, so size each dog
