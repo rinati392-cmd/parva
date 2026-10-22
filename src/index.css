@@ -41,10 +41,10 @@
 
 @layer components {
   .btn-primary {
-    @apply inline-flex h-14 items-center justify-center gap-2 rounded-full bg-primary px-8 text-lg font-semibold text-primary-foreground shadow-[0_10px_30px_-12px_hsl(var(--primary)/.6)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90 active:translate-y-0;
+    @apply inline-flex h-14 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-primary px-8 text-lg font-semibold text-primary-foreground shadow-[0_10px_30px_-12px_hsl(var(--primary)/.6)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90 active:translate-y-0;
   }
   .btn-ghost {
-    @apply inline-flex h-14 items-center justify-center gap-2 rounded-full border-2 border-primary/15 px-7 text-lg font-semibold text-primary transition-all duration-300 hover:border-primary/40 hover:bg-primary/5;
+    @apply inline-flex h-14 items-center justify-center gap-2 whitespace-nowrap rounded-full border-2 border-primary/15 px-7 text-lg font-semibold text-primary transition-all duration-300 hover:border-primary/40 hover:bg-primary/5;
   }
   .eyebrow {
     @apply inline-flex items-center gap-2 text-sm font-semibold tracking-wide text-primary/80;

@@ -54,7 +54,8 @@ const HeroStory = () => {
   // RTL "forward" is leftward: the sitting dog stands and walks out to the left, then the
   // walking dog enters from the right, crosses under the story copy once, and is gone.
   // The sitting dog is small inside the sequence frame (it grows as it walks closer), so zoom it in at rest.
-  const isLg = useMediaQuery("(min-width: 1024px)");
+  // Side-by-side (copy right, dog left) from tablet width; stacked on phones.
+  const isLg = useMediaQuery("(min-width: 768px)");
   const heroTextRef = useRef<HTMLDivElement>(null);
   const storyRef = useRef<HTMLDivElement>(null);
   const fit = useMobileDogFit(heroTextRef, storyRef, !isLg);
@@ -71,12 +72,12 @@ const HeroStory = () => {
 
         {/* Hero copy */}
         <div
-          className="container relative z-10 flex h-full flex-col justify-start pt-24 md:pt-32 lg:justify-center lg:pt-0"
+          className="container relative z-10 flex h-full flex-col justify-start pt-24 md:justify-center md:pt-0"
           style={{ opacity: 1 - heroOut, transform: `translateY(${-heroOut * 40}px)`, pointerEvents: heroOut > 0.6 ? "none" : "auto" }}
         >
-          <div ref={heroTextRef} className="max-w-xl lg:max-w-[46%]">
+          <div ref={heroTextRef} className="max-w-xl md:max-w-[50%] lg:max-w-[46%]">
             <p className="eyebrow animate-fade-up">מספרת כלבים בירושלים</p>
-            <h1 className="mt-4 animate-fade-up text-[clamp(2.6rem,10.5vw,4.5rem)] font-extrabold text-primary [animation-delay:100ms] lg:text-[clamp(3.5rem,5.4vw,5.6rem)]">
+            <h1 className="mt-4 animate-fade-up text-[clamp(2.6rem,10.5vw,4.5rem)] font-extrabold text-primary [animation-delay:100ms] md:text-[clamp(2.75rem,5.4vw,5.6rem)]">
               הם באים להתפנק.
               <br />
               <span className="text-accent">אתם</span> באים להתאהב.
@@ -84,7 +85,7 @@ const HeroStory = () => {
             <p className="mt-5 max-w-lg animate-fade-up text-lg text-muted-foreground [animation-delay:200ms] md:text-xl">
               תספורת, רחצה וטיפוח עם תשומת לב לכל פרט — ובעיקר למי שנמצא מתחת לפרווה.
             </p>
-            <div className="mt-7 flex animate-fade-up flex-col gap-3 [animation-delay:300ms] sm:flex-row sm:items-center">
+            <div className="mt-7 flex animate-fade-up flex-col gap-3 [animation-delay:300ms] sm:flex-row sm:flex-wrap sm:items-center">
               <button onClick={() => scrollToId("booking")} className="btn-primary">קובעים תור</button>
               <button onClick={() => scrollToId("finder")} className="btn-ghost">איזה טיפול מתאים לכלב שלי?</button>
             </div>
@@ -126,7 +127,7 @@ const HeroStory = () => {
 
         {/* The dog — sitting → standing → walking out */}
         <div
-          className="absolute bottom-[4vh] left-1/2 w-[min(66vw,340px)] will-change-transform lg:bottom-[7vh] lg:w-[min(34vw,500px)]"
+          className="absolute bottom-[4vh] left-1/2 w-[min(66vw,340px)] will-change-transform md:bottom-[7vh] md:w-[min(38vw,500px)] lg:w-[min(34vw,500px)]"
           style={{ transform: `translate3d(calc(-50% + ${sitX}vw),0,0)`, opacity: 1 - sitOut, width: fit?.sit, bottom: fit?.sitBottom }}
           aria-hidden={sitOut > 0.5}
         >
@@ -138,7 +139,7 @@ const HeroStory = () => {
 
         {/* The dog — walking across the page */}
         <div
-          className="absolute bottom-[calc(4vh+76px)] left-1/2 md:bottom-[4vh] w-[min(76vw,380px)] will-change-transform lg:bottom-[7vh] lg:w-[min(34vw,480px)]"
+          className="absolute bottom-[calc(4vh+76px)] left-1/2 w-[min(76vw,380px)] will-change-transform md:bottom-[7vh] md:w-[min(38vw,480px)] lg:w-[min(34vw,480px)]"
           style={{ transform: `translate3d(calc(-50% + ${walkX}vw),0,0)`, opacity: walkOpacity, width: fit?.walk, bottom: fit?.walkBottom }}
           aria-hidden={walkOpacity === 0}
         >
